@@ -1,0 +1,6 @@
+## Interface: 50400
+## Title: Keg Timer
+## Notes: Timer to determing if you should jab or wait for CD
+
+KegTimer.lua
+KegTimer.xml
