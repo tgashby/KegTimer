@@ -4,17 +4,21 @@ function events:UNIT_POWER(...)
  local curr_power = UnitPower("player")
  local power_regen, OOC_regen = GetPowerRegen()
 
- local start, duration, enable = GetSpellCooldown("Keg Smash")
- local name, rank, icon, powerCost, isFunnel, powerType, castingTime, minRange, maxRange = GetSpellInfo("Keg Smash")
+ local start, cdTimeLeft, enable = GetSpellCooldown("Keg Smash")
+ local kegSmashCost = select(4, GetSpellInfo("Keg Smash"))
+ local jabCost = select(4, GetSpellInfo("Jab"))
 
- if duration > 0
+ if cdTimeLeft > 0 then
  	-- Do all your calculations here!
- 	-- TODO Don't forget jab cost
- 	if curr_power + power_regen * duration >= powerCost
- 		-- Rejoice!
+ 	if curr_power + jabCost + power_regen * cdTimeLeft >= kegSmashCost
+ 		-- Rejoice! Have another jab
+ 	elseif curr_power + power_regen * cdTimeLeft >= kegSmashCost
+ 		-- Hold off on that jab bro.
  	else
- 		-- You're in trouble
+ 		-- You're in trouble, you done goof'd, you messed up, *WOMP WOMP*
  	end
+ else
+ 	-- Still good, make sure to handle this case
  end
 end
 
