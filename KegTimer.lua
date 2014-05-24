@@ -1,25 +1,65 @@
-local frame, events = CreateFrame("Frame"), {};
+local frame, events = CreateFrame("Frame", "KTFrame", UIParent), {};
+local backdrop = {
+	bgFile = select(3, GetSpellInfo("Keg Smash")),
+	edgeFile = "Interface/Tooltips/UI-Tooltip-Border", 
+	tile = false, 
+	tileSize = 0, 
+	edgeSize = 10,
+	insets = {
+		left = 0, 
+		right = 0, 
+		top = 0, 
+		bottom = 0
+	}
+};
+
+frame:SetBackdrop(backdrop);
+frame:Show();
+frame:SetPoint("CENTER");
+frame:SetSize(64, 64);
+
+frame:SetMovable(true);
+frame:EnableMouse(true);
+frame:RegisterForDrag("LeftButton");
+frame:SetScript("OnDragStart", frame.StartMoving);
+frame:SetScript("OnDragStop", frame.StopMovingOrSizing);
 
 function events:UNIT_POWER(...)
  local curr_power = UnitPower("player")
- local power_regen, OOC_regen = GetPowerRegen()
+ local inactive_regen, power_regen = GetPowerRegen()
 
- local start, cdTimeLeft, enable = GetSpellCooldown("Keg Smash")
+ local start, duration, enable = GetSpellCooldown("Keg Smash")
  local kegSmashCost = select(4, GetSpellInfo("Keg Smash"))
  local jabCost = select(4, GetSpellInfo("Jab"))
 
+ local cdTimeLeft = (start + duration - GetTime());
+
  if cdTimeLeft > 0 then
  	-- Do all your calculations here!
- 	if curr_power + jabCost + power_regen * cdTimeLeft >= kegSmashCost
+ 	if curr_power + power_regen * cdTimeLeft >= jabCost + kegSmashCost then
  		-- Rejoice! Have another jab
- 	elseif curr_power + power_regen * cdTimeLeft >= kegSmashCost
+		frame:SetBackdropColor(1, 1, 1, 1);
+ 	elseif curr_power + power_regen * cdTimeLeft >= kegSmashCost then
  		-- Hold off on that jab bro.
+		frame:SetBackdropColor(0.5, 0.5, 0, 1);
  	else
  		-- You're in trouble, you done goof'd, you messed up, *WOMP WOMP*
+		frame:SetBackdropColor(0.5, 0, 0, 1);
  	end
  else
- 	-- Still good, make sure to handle this case
+ 	if curr_power >= kegSmashCost then
+		-- Still good, make sure to handle this case
+		frame:SetBackdropColor(1, 1, 1, 1);
+ 	end
  end
+end
+
+function events:PLAYER_REGEN_DISABLED( ... )
+	frame:Show();
+end
+
+function events:PLAYER_REGEN_ENABLED( ... )
+	frame:Hide();
 end
 
 frame:SetScript("OnEvent", function(self, event, ...)
